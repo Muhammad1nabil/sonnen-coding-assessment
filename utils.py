@@ -21,15 +21,15 @@ def fibonacci_generator():
         a, b = b, a + b
 
 
-def read_yaml(file_path: str) -> dict:
+def read_yaml(file_path: pathlib.Path) -> dict:
     with open(file_path, "r") as ymlfile:
         logging.info(f"Reading {file_path}")
         return yaml.load(ymlfile, Loader=yaml.CLoader)
 
 
-def dump_yaml(parameters: dict, file_path: str) -> bool:
+def dump_yaml(parameters: dict, file_path: pathlib.Path) -> bool:
     with open(file_path, "w") as ymlfile:
-        logging.info(f"Dumping {file_path}")
+        logging.info(f"Dumping {file_path.name}")
         yaml.dump(parameters, ymlfile)
     return True
 

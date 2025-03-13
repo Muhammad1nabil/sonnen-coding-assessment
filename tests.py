@@ -2,6 +2,7 @@ import pytest
 import utils
 from BMS_simulator import DUT, simulate_SB
 import logging
+from datetime import datetime
 
 
 @pytest.fixture
@@ -13,8 +14,9 @@ def fixture_dut():
     yield dut
 
     # teardown
+    now = datetime.now().strftime("%H%M%S")
     utils.dump_yaml(
-        dut.parameters, utils.output_folder.joinpath("run_final_parameters.yaml")
+        dut.parameters, utils.output_folder.joinpath(f"{now}_run_final_parameters.yaml")
     )
     dut.parameters = initial_state
 
