@@ -1,0 +1,32 @@
+# Photovoltaic Panel Readings
+solar_panel_voltage: 0   # Volts
+solar_panel_current: 0    # Amps
+solar_panel_power: 0     # Watts   1
+
+# Grid Readings
+grid_power: 0             # Watts
+grid_voltage: 0           # Volts
+grid_frequency: 0         # Hertz
+
+# House Readings
+house_intake_power: 0       # Watts   2
+house_intake_current: 0     # Amps    2
+house_voltage: 0            # Volts
+house_frequency: 0          # Hertz
+
+# Inverter Readings
+inverter_max_power: 0       # Watts
+inverter_grid_frequency: 0  # Hertz
+inverter_grid_voltage: 0    # Volts
+battery_voltage: 12.0       # Volts
+battery_current: 0          # Amps
+inverter_power: 0           # Watts (+) charging | (-) discharging
+
+# BMS Readings
+BMS_temperature: 0          # Celsius Degree
+BMS_voltage: 0              # Volts
+BMS_max_power: 0            # Watts
+
+# Storage
+storage_command: Charge   # Charge | Discharge
+
