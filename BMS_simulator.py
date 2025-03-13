@@ -3,7 +3,8 @@ import yaml
 class DUT:
     def __init__(self):
         self.parameters = {}
-        self.parameters = yaml.load("readings.yaml", 'r')
+        with open('readings.yaml', 'r') as ymlfile:
+            self.parameters = yaml.load(ymlfile, Loader=yaml.CLoader)
 
     def set(self, key: str, value) -> bool:
         self.parameters[key] = value
