@@ -7,7 +7,7 @@ import logging
 @pytest.fixture
 def fixture_dut():
     # setup
-    utils.setup_logging()   
+    utils.setup_logging()
     dut = DUT()
     initial_state = dut.parameters.copy()
     yield dut
