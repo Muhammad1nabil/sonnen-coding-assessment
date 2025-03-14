@@ -15,6 +15,13 @@ class Controller:
         self.inverter_power = 0
         self.inverter_voltage = 0
         self.inverter_frequency = 0
+        self.capacity_percentage = 0
+
+    def calculate_capacity_percentage(self):
+        self.capacity_percentage = self.inputs["storage_capacity"] / (
+            self.inputs["usable_capacity"] * self.inputs["BMS_count"]
+        )
+        logging.info(f"storage capacity {self.capacity_percentage}%")
 
     def temp_safty_check(self):
         """
@@ -67,10 +74,13 @@ class Controller:
             logging.critical("energy flow is off.")
             return self.command
 
+        # calculate SB capacity percentage
+        self.calculate_capacity_percentage()
+
         # case: over production
         if self.inputs["pv_panel_power"] > self.inputs["load_power"]:
             # case: over production and battery is not full
-            if self.inputs["battery_capacity"] < 1:
+            if self.capacity_percentage < 1:
                 self.command = "Charge - Battery"
                 # output limited by inverter and battery max power
                 # considering inverter power sign to be (+) in case charging
@@ -80,12 +90,12 @@ class Controller:
                     self.inputs["BMS_max_power"],
                 )
 
-                msg = f"charging battery with (PV production ({self.inputs['pv_panel_power']})\
-                       - load consumption ({self.inputs['load_power']})) by rate ({self.input_power})"
+                msg = f"charging battery with (PV production ({self.inputs['pv_panel_power']})" + \
+                      f" - load consumption ({self.inputs['load_power']})) by rate ({self.inverter_power})"
                 logging.info(msg)
 
             # case: over production and battery is full
-            elif self.inputs["battery_capacity"] == 1:
+            elif self.capacity_percentage == 1:
                 self.command = "Sell - Grid"
 
                 # reflecting the surplus production in grid_power_total with (+)
@@ -104,7 +114,7 @@ class Controller:
         # case: production deficiency
         elif self.inputs["pv_panel_power"] < self.inputs["load_power"]:
             # case: production deficiency and buttery is not empty
-            if self.inputs["battery_capacity"] > 0:
+            if self.capacity_percentage > 0:
                 self.command = "Discharge - Battery"
                 # discharging with a limitation of inverter max power and BMS max power
                 # considering inverter power sign to be (-) in case discharging
@@ -125,9 +135,8 @@ class Controller:
                 logging.info(msg)
 
             # case: production deficiency and buttery is empty
-            elif self.inputs["battery_capacity"] == 0:
+            elif self.capacity_percentage == 0:
                 self.command = "Buy - Grid"
-
                 # reflecting the consumption gap in grid_power_total with (-)
                 self.grid_total -= (
                     self.inputs["load_power"] - self.inputs["pv_panel_power"]

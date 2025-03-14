@@ -14,7 +14,7 @@ load_voltage: 0             # Volts
 load_frequency: 0           # Hertz
 
 # Inverter Readings
-inverter_max_power: 0       # Watts
+inverter_max_power: 1000    # Watts
 inverter_grid_frequency: 0  # Hertz
 inverter_grid_voltage: 0    # Volts
 battery_voltage: 12.7       # Volts
@@ -24,10 +24,11 @@ inverter_power: 0           # Watts (+) charging | (-) discharging
 # BMS Readings
 BMS_temp: 0                 # Celsius Degree
 BMS_voltage: 0              # Volts
-BMS_max_power: 0            # Watts
+BMS_max_power: 1100         # Watts
 
 # Storage
 storage_command: Charge     # Charge | Discharge
+storage_capacity: 9000      # Watts
 usable_capacity: 5000       # Watts per BMS
 BMS_count: 2                # number of BMS in SB
 operational_temp:
