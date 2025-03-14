@@ -43,7 +43,7 @@ def setup_logging():
         print("Creating output folder")
         output_folder.mkdir()
 
-    now = datetime.today().strftime("%d%m%Y")
+    now = datetime.today().strftime("%Y%m%d")
     log_file = logs_folder.joinpath(f"{now}.log")
 
     if not log_file.exists():
@@ -56,6 +56,6 @@ def setup_logging():
         filename=f"Logs/{now}.log",
         format="%(asctime)s\t|\t%(levelname)s\t|\t%(message)s",
         level=logging.INFO,
-        datefmt="%d-%m-%Y %H:%M:%S",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logging.info("tool started")
+    logging.info("test started")
