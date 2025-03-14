@@ -49,11 +49,101 @@ class Controller:
             return True
         else:
             logging.critical(
-                f"Battery is switching off. battery temperature is not in operational temperature range \
-                             (min {self.inputs['operational_temp'][0]} \
-                             max {self.inputs['operational_temp'][1]})"
+                f"Battery is switching off. battery temperature is not in operational temperature range "
+                + f"(min {self.inputs['operational_temp'][0]} max {self.inputs['operational_temp'][1]})"
             )
             return False
+
+    def execute_charge_battery(self):
+        """
+        execute charge battery steps
+        """
+        self.command = "Charge - Battery"
+        # output limited by inverter and battery max power
+        # considering inverter power sign to be (+) in case charging
+        self.inverter_power = min(
+            self.inputs["pv_panel_power"] - self.inputs["load_power"],
+            self.inputs["inverter_max_power"],
+            self.inputs["BMS_max_power"],
+        )
+
+        msg = (
+            f"charging battery with (PV production ({self.inputs['pv_panel_power']})"
+            + f" - load consumption ({self.inputs['load_power']})) by rate ({self.inverter_power})"
+        )
+        logging.info(msg)
+
+    def execute_sell_grid(self):
+        """
+        execute sell grid steps
+        """
+
+        self.command = "Sell - Grid"
+
+        # reflecting the surplus production in grid_power_total with (+)
+        self.grid_total += self.inputs["pv_panel_power"] - self.inputs["load_power"]
+
+        # not sure if the following 2 lines wont blow up the building or not tbh xD
+        self.output_frequency = self.inputs["inverter_grid_frequency"]
+        self.output_voltage = self.inputs["inverter_grid_voltage"]
+
+        msg = f"selling PV production surplus ({self.inputs['pv_panel_power'] - self.inputs['load_power']} W) to the grid"
+
+        logging.info(msg)
+
+    def execute_discharge_battery(self):
+        """
+        execute discharge battery steps
+        """
+
+        self.command = "Discharge - Battery"
+        # discharging with a limitation of inverter max power and BMS max power
+        # considering inverter power sign to be (-) in case discharging
+        self.inverter_power = -min(
+            self.inputs["load_power"] - self.inputs["pv_panel_power"],
+            self.inputs["inverter_max_power"],
+            self.inputs["BMS_max_power"],
+        )
+
+        self.output_frequency = self.inputs["load_frequency"]
+        self.output_voltage = self.inputs["load_voltage"]
+
+        # deduct the consumed power provided from battery from battery capacity
+
+        msg = (
+            f"discharging battery to provide the difference "
+            + f"(load consumption ({self.inputs['load_power']} W) - "
+            + f"PV production ({self.inputs['pv_panel_power']} W))"
+        )
+        logging.info(msg)
+
+    def execute_buy_grid(self):
+        """
+        execute buy grid steps
+        """
+        self.command = "Buy - Grid"
+        # reflecting the consumption gap in grid_power_total with (-)
+        self.grid_total -= self.inputs["load_power"] - self.inputs["pv_panel_power"]
+
+        msg = (
+            f"buying PV production deficiency ({self.inputs['load_power'] - self.inputs['pv_panel_power']} W)"
+            + f" from the grid"
+        )
+        logging.info(msg)
+
+    def execute_none_battery(self):
+        """
+        execute none battery steps
+        """
+        self.command = "None - Battery"
+        logging.info("PV production is equal to load consumption. no SB action needed")
+
+    def execute_temp_check_fail(self):
+        """
+        execute none battery steps with critical log for safty check fail
+        """
+        self.command = "None - Battery"
+        logging.critical("energy flow is off.")
 
     def energy_flow(self):
         """
@@ -70,8 +160,7 @@ class Controller:
 
         # safty check before execution
         if not self.temp_safty_check():
-            self.command = "None - Battery"
-            logging.critical("energy flow is off.")
+            self.execute_temp_check_fail()
             return self.command
 
         # calculate SB capacity percentage
@@ -81,76 +170,24 @@ class Controller:
         if self.inputs["pv_panel_power"] > self.inputs["load_power"]:
             # case: over production and battery is not full
             if self.capacity_percentage < 1:
-                self.command = "Charge - Battery"
-                # output limited by inverter and battery max power
-                # considering inverter power sign to be (+) in case charging
-                self.inverter_power = min(
-                    self.inputs["pv_panel_power"] - self.inputs["load_power"],
-                    self.inputs["inverter_max_power"],
-                    self.inputs["BMS_max_power"],
-                )
-
-                msg = f"charging battery with (PV production ({self.inputs['pv_panel_power']})" + \
-                      f" - load consumption ({self.inputs['load_power']})) by rate ({self.inverter_power})"
-                logging.info(msg)
+                self.execute_charge_battery()
 
             # case: over production and battery is full
             elif self.capacity_percentage == 1:
-                self.command = "Sell - Grid"
-
-                # reflecting the surplus production in grid_power_total with (+)
-                self.grid_total += (
-                    self.inputs["pv_panel_power"] - self.inputs["load_power"]
-                )
-
-                # not sure if the following 2 lines wont blow up the building or not tbh xD
-                self.output_frequency = self.inputs["inverter_grid_frequency"]
-                self.output_voltage = self.inputs["inverter_grid_voltage"]
-
-                msg = f"selling PV production surplus \
-                        ({self.inputs['pv_panel_power'] - self.inputs['load_power']} W) to the grid"
-                logging.info(msg)
+                self.execute_sell_grid()
 
         # case: production deficiency
         elif self.inputs["pv_panel_power"] < self.inputs["load_power"]:
             # case: production deficiency and buttery is not empty
             if self.capacity_percentage > 0:
-                self.command = "Discharge - Battery"
-                # discharging with a limitation of inverter max power and BMS max power
-                # considering inverter power sign to be (-) in case discharging
-                self.inverter_power =  - min(
-                    self.inputs["load_power"] - self.inputs["pv_panel_power"],
-                    self.inputs["inverter_max_power"],
-                    self.inputs["BMS_max_power"],
-                )
-
-                self.output_frequency = self.inputs["load_frequency"]
-                self.output_voltage = self.inputs["load_voltage"]
-
-                # deduct the consumed power provided from battery from battery capacity
-
-                msg = f"discharging battery to provide the difference \
-                    (load consumption ({self.inputs['load_power']} W) - \
-                        PV production ({self.inputs['pv_panel_power']} W))"
-                logging.info(msg)
+                self.execute_discharge_battery()
 
             # case: production deficiency and buttery is empty
             elif self.capacity_percentage == 0:
-                self.command = "Buy - Grid"
-                # reflecting the consumption gap in grid_power_total with (-)
-                self.grid_total -= (
-                    self.inputs["load_power"] - self.inputs["pv_panel_power"]
-                )
-
-                msg = f"buying PV production deficiency  \
-                        ({self.inputs['load_power'] - self.inputs['pv_panel_power']} W) from the grid"
-                logging.info(msg)
+                self.execute_buy_grid()
         # case: production equal consumption
         else:
-            self.command = "None - Battery"
-            logging.info(
-                "PV production is equal to load consumption. no SB action needed"
-            )
+            self.execute_none_battery()
 
         return self.command
 
