@@ -24,6 +24,7 @@ The system's behavior is simulated based on the following components and their i
 * `utils.py`: Contains all utility functions, Fibonacci generator, read yaml, dump yaml, and setup logging
 * `BMS_simulator.py`: Contains the battery system simulation code, the DUT class, and the Controller class
 * `tests.py`: contains simulation tests, pytest fixture, and testcases
+* `readings.yaml`: to setup the initial configurations and readings
 
 ## How to Run the Tests
 
