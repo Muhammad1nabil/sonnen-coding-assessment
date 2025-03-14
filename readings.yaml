@@ -1,18 +1,17 @@
 # Photovoltaic Panel Readings
-pv_panel_voltage: 0   # Volts
-pv_panel_current: 0    # Amps
-pv_panel_power: 0     # Watts
+pv_panel_voltage: 0         # Volts
+pv_panel_current: 0         # Amps
+pv_panel_power: 0           # Watts
 
 # Grid Readings
-grid_power: 0             # Watts
-grid_voltage: 0           # Volts
-grid_frequency: 0         # Hertz
+grid_voltage: 0             # Volts
+grid_frequency: 0           # Hertz
 
 # House Readings
-load_power: 0       # Watts
-load_current: 0     # Amps
-load_voltage: 0            # Volts
-load_frequency: 0          # Hertz
+load_power: 0               # Watts
+load_current: 0             # Amps
+load_voltage: 0             # Volts
+load_frequency: 0           # Hertz
 
 # Inverter Readings
 inverter_max_power: 0       # Watts
@@ -23,10 +22,17 @@ battery_current: 0          # Amps
 inverter_power: 0           # Watts (+) charging | (-) discharging
 
 # BMS Readings
-BMS_temperature: 0          # Celsius Degree
+BMS_temp: 0                 # Celsius Degree
 BMS_voltage: 0              # Volts
 BMS_max_power: 0            # Watts
 
 # Storage
-storage_command: Charge   # Charge | Discharge
-
+storage_command: Charge     # Charge | Discharge
+usable_capacity: 5000       # Watts per BMS
+BMS_count: 2                # number of BMS in SB
+operational_temp:
+  - -10                     # Celsius degree minimum temp
+  - 50                      # Celsius degree maximum temp
+best_condition_temp:
+  - 5                       # Celsius degree minimum temp
+  - 40                      # Celsius degree maximum temp
