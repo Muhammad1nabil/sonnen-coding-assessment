@@ -12,10 +12,9 @@ class Controller:
         self.inputs = inputs
         self.command = ""
         self.grid_total = 0
-        self.output_power = 0
-        self.input_power = 0
-        self.output_voltage = 0
-        self.output_frequency = 0
+        self.inverter_power = 0
+        self.inverter_voltage = 0
+        self.inverter_frequency = 0
 
     def temp_safty_check(self):
         """
@@ -74,11 +73,13 @@ class Controller:
             if self.inputs["battery_capacity"] < 1:
                 self.command = "Charge - Battery"
                 # output limited by inverter and battery max power
-                self.input_power = min(
+                # considering inverter power sign to be (+) in case charging
+                self.inverter_power = min(
                     self.inputs["pv_panel_power"] - self.inputs["load_power"],
                     self.inputs["inverter_max_power"],
                     self.inputs["BMS_max_power"],
                 )
+
                 msg = f"charging battery with (PV production ({self.inputs['pv_panel_power']})\
                        - load consumption ({self.inputs['load_power']})) by rate ({self.input_power})"
                 logging.info(msg)
@@ -104,13 +105,15 @@ class Controller:
         elif self.inputs["pv_panel_power"] < self.inputs["load_power"]:
             # case: production deficiency and buttery is not empty
             if self.inputs["battery_capacity"] > 0:
-                # discharging with a limitation of inverter max power and BMS max power
                 self.command = "Discharge - Battery"
-                self.output_power = min(
+                # discharging with a limitation of inverter max power and BMS max power
+                # considering inverter power sign to be (-) in case discharging
+                self.inverter_power =  - min(
                     self.inputs["load_power"] - self.inputs["pv_panel_power"],
                     self.inputs["inverter_max_power"],
                     self.inputs["BMS_max_power"],
                 )
+
                 self.output_frequency = self.inputs["load_frequency"]
                 self.output_voltage = self.inputs["load_voltage"]
 
