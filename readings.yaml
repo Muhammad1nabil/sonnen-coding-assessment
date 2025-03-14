@@ -1,7 +1,7 @@
 # Photovoltaic Panel Readings
-solar_panel_voltage: 0   # Volts
-solar_panel_current: 0    # Amps
-solar_panel_power: 0     # Watts   1
+pv_panel_voltage: 0   # Volts
+pv_panel_current: 0    # Amps
+pv_panel_power: 0     # Watts
 
 # Grid Readings
 grid_power: 0             # Watts
@@ -9,16 +9,16 @@ grid_voltage: 0           # Volts
 grid_frequency: 0         # Hertz
 
 # House Readings
-house_intake_power: 0       # Watts   2
-house_intake_current: 0     # Amps    2
-house_voltage: 0            # Volts
-house_frequency: 0          # Hertz
+load_power: 0       # Watts
+load_current: 0     # Amps
+load_voltage: 0            # Volts
+load_frequency: 0          # Hertz
 
 # Inverter Readings
 inverter_max_power: 0       # Watts
 inverter_grid_frequency: 0  # Hertz
 inverter_grid_voltage: 0    # Volts
-battery_voltage: 12.0       # Volts
+battery_voltage: 12.7       # Volts
 battery_current: 0          # Amps
 inverter_power: 0           # Watts (+) charging | (-) discharging
 
